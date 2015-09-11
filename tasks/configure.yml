@@ -1,0 +1,54 @@
+---
+- name: add node_modules/.bin to $PATH using .env and .profile
+  copy: >
+    dest={{ discourse_base_dir }}/{{ item }}
+    content='export PATH={{ discourse_base_dir }}/node_modules/.bin:$PATH\n'
+    owner={{ discourse_user }}
+    group={{ discourse_group }}
+    mode=0644
+  with_items:
+    - .env
+    - .profile
+
+- name: configure discourse
+  template: >
+    src=discourse.conf.j2
+    dest={{ discourse_conf_dir }}/discourse.conf
+    owner=root group={{ discourse_group }} mode=0640
+  notify: restart discourse
+
+- name: symlink discourse config to default location
+  file: >
+    state=link
+    src={{ discourse_conf_dir }}/discourse.conf
+    dest={{ discourse_base_dir }}/config/discourse.conf
+    force=yes
+
+- name: copy our unicorn config
+  copy: >
+    src=unicorn.conf.rb
+    dest={{ discourse_conf_dir }}/unicorn.conf.rb
+    owner=root group=root mode=0644
+  notify: restart discourse
+
+- name: configure discourse runscript
+  template: >
+    src=runscript.conf.j2
+    dest=/etc/conf.d/discourse
+    owner=root group=root mode=0644
+  notify: restart discourse
+
+- name: configure nginx site
+  template: >
+    src=nginx/discourse.conf.j2
+    dest={{ discourse_nginx_conf_path }}
+    owner=root group=root mode=0644
+  notify: reload nginx
+  when: discourse_nginx_conf_path != ''
+
+- name: configure logrotate
+  template: >
+    src=logrotate.j2
+    dest=/etc/logrotate.d/discourse
+    owner=root group=root mode=0644
+  ignore_errors: yes

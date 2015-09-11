@@ -1,0 +1,50 @@
+#!/sbin/runscript
+# Copyright 1999-2015 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+name="discourse"
+description="A platform for community discussion."
+
+: ${user:=discourse}
+: ${basedir:=/opt/discourse}
+: ${logdir:=/var/log/discourse}
+: ${pidfile:=/run/discourse/unicorn.pid}
+
+: ${rails_env:=production}
+: ${unicorn_config:=/etc/discourse/unicorn.conf.rb}
+: ${unicorn_listen:=/run/discourse/unicorn.sock}
+: ${unicorn_workers:=3}
+: ${unicorn_sidekiqs:=5}
+
+required_dirs="${basedir}"
+required_files="${unicorn_config}"
+
+command="/usr/bin/bundle"
+command_args="exec unicorn -c ${unicorn_config}"
+command_background="yes"
+
+start_stop_daemon_args="
+	--chdir '$basedir'
+	--user $user
+	--stdout '${logdir}/unicorn.stdout.log'
+	--stderr '${logdir}/unicorn.stderr.log'
+	--env RAILS_ENV=$rails_env
+	--env RUBY_GC_MALLOC_LIMIT=40000000
+	--env RUBY_HEAP_MIN_SLOTS=800000
+	--env DISCOURSE_PATH='$basedir'
+	--env UNICORN_LISTEN='$unicorn_listen'
+	--env UNICORN_WORKERS=$unicorn_workers
+	--env UNICORN_SIDEKIQS=$unicorn_sidekiqs"
+
+depend() {
+	use net postgresql redis
+}
+
+start_pre() {
+	checkpath -d -o $user -m755 "$(dirname "$pidfile")"
+	checkpath -d -o $user -m755 "$logdir"
+
+	if [[ "$unicorn_listen" == /* ]]; then
+		checkpath -d -o $user -m755 "$(dirname "$unicorn_listen")"
+	fi
+}

@@ -1,0 +1,110 @@
+---
+# URL of the Discourse repository to clone.
+discourse_source_url: https://github.com/discourse/discourse.git
+
+# Revision (tag or branch) to checkout.
+discourse_source_rev: v1.3.5
+
+
+# User to run Discourse (will be created if not exist).
+discourse_user: discourse
+
+# Group to run Discourse (will be created if not exist).
+discourse_group: "{{ discourse_user }}"
+
+# Hostname running the forum (e.g. discuss.example.org).
+discourse_hostname: "discuss.{{ inventory_hostname }}"
+
+# List of emails that have developer level access (i.e. admins).
+discourse_developer_emails:
+  - "admin@{{ inventory_hostname }}"
+
+# List of Discourse plugins to install, each as a dict with keys:
+#
+#   name     - Name of the plugin.
+#   repo_url - URL of the plugin's git repository to clone.
+#   rev      - Revision (tag or branch) to checkout.
+#
+# Example:
+#   - name: discourse-spoiler-alert
+#     repo_url: https://github.com/discourse/discourse-spoiler-alert.git
+#     rev: HEAD
+discourse_plugins: []
+
+#
+# Unicorn & Sidekiq
+#
+
+# TCP address (and port), or absolute path of the Unix socket to listen on.
+#
+# Examples:
+#   127.0.0.1:3000
+#   /run/discourse/unicorn.sock
+discourse_unicorn_listen: /run/discourse/unicorn.sock
+
+# How many Unicorn processes to run.
+discourse_unicorn_workers: 3
+
+# How many Sidekiq processes to run.
+discourse_sidekiq_workers: 1
+
+#
+# PostgreSQL
+#
+
+discourse_db_name: discourse
+discourse_db_user: "{{ discourse_db_name }}"
+discourse_db_pass: discourse
+discourse_db_host: "{{ pg_host | default('localhost') }}"
+discourse_db_port: 5432
+discourse_db_pool: 6
+
+# Should not be changed!
+discourse_db_delegate_to: "{{ discourse_db_host | replace('localhost', inventory_hostname) | replace('127.0.0.1', inventory_hostname) }}"
+
+#
+# Redis
+#
+
+discourse_redis_host: localhost
+discourse_redis_port: 6379
+
+# Name (number) of the Redis database to use.
+discourse_redis_db: 0
+
+#
+# SMTP
+#
+
+discourse_smtp_host: localhost
+discourse_smtp_port: 25
+discourse_smtp_domain: "{{ inventory_hostname }}"
+
+#
+# nginx
+#
+
+# The maximum file upload size in megabytes.
+discourse_max_upload_size: 10
+
+# Path of the TLS/SSL certificate to be used by nginx.
+discourse_ssl_cert:
+
+# Path of the private key for the TLS/SSL certificate.
+discourse_ssl_key:
+
+#
+# Paths
+#
+
+# Path of the directory to install Discourse into.
+discourse_base_dir: /opt/discourse
+
+# Path of the configuration directory.
+discourse_conf_dir: /etc/discourse
+
+# Path of the logs directory.
+discourse_logs_dir: /var/log/discourse
+
+# Path of the discourse site's config for nginx.
+discourse_nginx_conf_path: /etc/nginx/sites/discourse.conf

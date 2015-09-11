@@ -1,0 +1,22 @@
+---
+- name: create database user
+  delegate_to: "{{ discourse_db_delegate_to }}"
+  postgresql_user: >
+    name={{ discourse_db_user }}
+    password={{ discourse_db_pass }}
+
+- name: create database
+  delegate_to: "{{ discourse_db_delegate_to }}"
+  postgresql_db: >
+    name={{ discourse_db_name }}
+    owner={{ discourse_db_user }}
+    encoding='UTF-8'
+
+- name: add extensions to database
+  delegate_to: "{{ discourse_db_delegate_to }}"
+  postgresql_ext: >
+    name={{ item }}
+    db={{ discourse_db_name }}
+  with_items:
+    - hstore
+    - pg_trgm

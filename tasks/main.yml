@@ -1,0 +1,26 @@
+---
+- include: install.yml
+
+- include: configure.yml
+
+- include: database.yml
+  sudo: yes
+  sudo_user: postgres
+
+- name: stop discourse before upgrade
+  service: name=discourse state=stopped
+  when: _discourse_clone | changed
+
+- include: initialize.yml
+  sudo: yes
+  sudo_user: "{{ discourse_user }}"
+  when: _discourse_clone | changed
+
+# Trigger handlers now to avoid unnecessary restarts.
+- meta: flush_handlers
+
+- name: enable and start discourse
+  service: >
+    name=discourse
+    enabled=yes
+    state=started

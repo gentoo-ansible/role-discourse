@@ -1,0 +1,26 @@
+# {{ ansible_managed }}
+
+# User to run Discourse.
+user="{{ discourse_user }}"
+
+# Base directory of the Discourse app.
+basedir="{{ discourse_base_dir }}"
+
+# Path of the directory to store logs.
+logdir="{{ discourse_logs_dir }}"
+
+# Location of the pid file.
+pidfile="/run/discourse/unicorn.pid"
+
+# Location of the Unicorn config file.
+unicorn_config="{{ discourse_conf_dir }}/unicorn.conf.rb"
+
+# TCP address and port, or absolute path of the Unix socket to listen on.
+# E.g. 127.0.0.1:9292, /run/discourse/unicorn.sock
+unicorn_listen="{{ discourse_unicorn_listen }}"
+
+# How many worker processes to run.
+unicorn_workers="{{ discourse_unicorn_workers }}"
+
+# How many Sidekiq instances to run.
+unicorn_sidekiqs="{{ discourse_sidekiq_workers }}"

@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+
+{{ discourse_logs_dir }}/*.log {
+	missingok
+	compress
+	delaycompress
+	copytruncate
+}

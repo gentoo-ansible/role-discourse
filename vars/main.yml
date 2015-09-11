@@ -1,0 +1,19 @@
+---
+# Paths to exclude from the Discourse source repo.
+discourse_sparsecheckout:
+  - '/*'
+  - '!/.tx'
+  - '!/log'
+  - '!/packaging'
+  - '!/*.sample'
+  - '!/.pkgr.yml'
+  - '!/.codeclimate.yml'
+  - '!/.travis.yml'
+  - '!/Brewfile'
+  - '!/Vagrantfile'
+  - '!/discourse.sublime-project'
+  - '!/config/discourse.config.sample'
+  - '!/config/logrotate.conf'
+  - '!/config/nginx.global.conf'
+  - '!/config/unicorn_upstart.conf'
+  - '!/config/unicorn.conf.rb'

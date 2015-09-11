@@ -1,0 +1,45 @@
+---
+- name: run bundle install (this will take few minutes)
+  command: >
+    bundle install -j{{ ansible_processor_count }} --deployment --without development test
+    chdir={{ discourse_base_dir }}
+  register: _bundle_install
+
+- name: print stdout from `bundle install`
+  debug: var=_bundle_install.stdout_lines
+  changed_when: false
+  when: _bundle_install | changed
+
+- name: print stderr from `bundle install`
+  debug: var=_bundle_install.stderr_lines
+  changed_when: false
+  when: _bundle_install | changed
+
+# `bundle install` may alter the "BUNDLED WITH" version in Gemfile.lock. If we
+# run the playbook again, Ansible will think there have been changes to the git
+# repo even if the commit hash is the same. The following task prevents this.
+- name: discard changes in Gemfile.lock
+  command: >
+    git checkout -- Gemfile.lock
+    chdir={{ discourse_base_dir }}
+  changed_when: false
+  when: _bundle_install | changed
+
+- name: install npm modules
+  npm: >
+    name={{ item }}
+    production=true
+    path={{ discourse_base_dir }}
+  with_items:
+    - svgo
+    - uglify-js
+
+- name: initialize database
+  shell: >
+    bundle exec rake db:migrate RAILS_ENV=production
+    chdir={{ discourse_base_dir }}
+
+- name: precompile assets (this will take few minutes)
+  command: >
+    bundle exec rake assets:precompile RAILS_ENV=production
+    chdir={{ discourse_base_dir }}

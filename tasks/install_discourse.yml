@@ -1,0 +1,24 @@
+---
+  # The aim is to exclude unwanted directories and avoid its recreating
+  # on every checkout.
+- name: prepare sparse git repository for discourse
+  shell: |
+    git init
+    git config core.sparsecheckout true
+    git remote add origin {{ discourse_source_url }}
+    chdir={{ discourse_base_dir }}
+    creates={{ discourse_base_dir }}/.git
+  register: _discourse_init
+
+- name: configure sparse-checkout for discourse
+  copy: >
+    dest={{ discourse_base_dir }}/.git/info/sparse-checkout
+    content='{{ discourse_sparsecheckout | join("\n") }}'
+
+- name: clone discourse source repository
+  git: >
+    repo={{ discourse_source_url }}
+    version={{ discourse_source_rev }}
+    dest={{ discourse_base_dir }}
+    accept_hostkey=yes
+  register: _discourse_clone
